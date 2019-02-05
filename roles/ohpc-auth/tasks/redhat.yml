@@ -1,0 +1,116 @@
+---
+
+## Authentication through AD
+
+- name: authentication | Package installation
+  yum:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - finger
+      - samba-common
+      - samba-common-tools
+      - krb5-workstation
+      - sssd
+      - sssd-tools
+      - realmd
+      - adcli
+
+- name: copy |  krb5.conf configuration
+  copy:
+    src: krb5.conf
+    dest: /etc/krb5.conf
+    owner: root
+    mode: 0644
+
+- name: check | if server is enrolled
+  shell: /bin/bash -c "realm list | grep sssd" 
+  register: realmd_bound
+  changed_when: false
+  ignore_errors: true
+
+- name: join |  AD domain
+  shell: /bin/bash -c 'echo {{ ad.domain_pwd }} | realm join -U {{ ad.domain_user }} --client-software=sssd --computer-ou={{ ad.domain_ou }} {{ ad.domain }}' 
+  when: realmd_bound is failed
+
+- name: disable | use fully qualified domain names
+  lineinfile:
+    path: /etc/sssd/sssd.conf
+    mode: 0600
+    owner: root
+    regexp: '^use_fully_qualified_names\s'
+    line: "use_fully_qualified_names = False"
+
+- name: disable | ldap_id_mapping = False 
+  lineinfile:
+    path: /etc/sssd/sssd.conf
+    regexp: '^ldap_id_mapping\s'
+    line: "ldap_id_mapping = False"
+
+- name: enable |  auto private groups
+  lineinfile:
+    path: /etc/sssd/sssd.conf
+    state: present
+    line: "auto_private_groups = True"
+
+- name: update | fallback dir 
+  lineinfile:
+    path: /etc/sssd/sssd.conf
+    regexp: '^fallback_homedir\s'
+    line: "fallback_homedir = /crash/%u"
+
+- name: add | override homedir
+  lineinfile:
+    path: /etc/sssd/sssd.conf
+    state: present
+    line: "override_homedir = /home/%u"
+
+- name: enable sssd service 
+  service:
+    name: sssd
+    enabled: yes 
+
+- name: enable realmd service
+  service: 
+    name: realmd 
+    enabled: yes 
+
+- name: enable sssd service 
+  service:
+    name: sssd
+    state: restarted 
+
+- name: enable realmd service
+  service: 
+    name: realmd 
+    state: restarted
+
+## Authorization through pam 
+
+- name: copy | /etc/users.allow
+  copy:
+    src: users.allow
+    dest: /etc/users.allow
+    owner: root
+    mode: 0600
+
+- name: auth | insert users.allow in password-auth-ac
+  lineinfile:
+    path: /etc/pam.d/password-auth-ac
+    state: present
+    insertafter: "pam_faildelay.so"
+    line: "auth        required      pam_listfile.so item=user sense=allow file=/etc/users.allow"
+    owner: root
+    mode: 0600
+
+- name: session | insert users.allow in password-auth-ac
+  lineinfile:
+    path: /etc/pam.d/password-auth-ac
+    state: present
+    insertbefore: "pam_keyinit.so"
+    line: "session     required      pam_listfile.so item=user sense=allow file=/etc/users.allow"
+    owner: root
+    mode: 0600
+
+

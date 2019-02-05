@@ -1,0 +1,228 @@
+---
+
+# Install from release rpm
+
+## ELREPO
+
+- name: ELREPO | Check repo
+  stat: path={{ elrepo_repofile_path }}
+  register: elrepo_repofile_result
+
+- name: ELREPO | Install repo
+  yum:
+    name: "{{ elrepo_repo_url }}"
+    state: present
+  register: result
+  until: 'result.rc == 0'
+  retries: 5
+  delay: 10
+  when:
+    - not elrepo_repofile_result.stat.exists
+    - elrepo_repo_state is defined
+
+- name: ELREPO | Import GPG key.
+  rpm_key:
+    key: "{{ elrepo_repo_gpg_key_url }}"
+    state: present
+  when:
+    - not elrepo_repofile_result.stat.exists
+    - elrepo_repo_state is defined
+  ignore_errors: "{{ ansible_check_mode }}"
+
+## EPEL 
+
+- name: EPEL | Check repo
+  stat: path={{ epel_repofile_path }}
+  register: epel_repofile_result
+
+- name: EPEL | Install repo.
+  yum:
+    name: "{{ epel_repo_url }}"
+    state: present
+  register: result
+  until: 'result.rc == 0'
+  retries: 5
+  delay: 10
+  when:
+    - not epel_repofile_result.stat.exists
+    - epel_repo_state is defined
+
+- name: EPEL | Import GPG key.
+  rpm_key:
+    key: "{{ epel_repo_gpg_key_url }}"
+    state: present
+  when:
+    - not epel_repofile_result.stat.exists
+    - epel_repo_state is defined
+  ignore_errors: "{{ ansible_check_mode }}"
+
+## OHPC 
+
+- name: OHPC | Check repo
+  stat: path={{ ohpc_repofile_path }}
+  register: ohpc_repofile_result
+
+- name: OHPC | Install repo
+  yum:
+    name: "{{ ohpc_repo_url }}"
+    state: present
+  register: result
+  until: 'result.rc == 0'
+  retries: 5
+  delay: 10
+  when:
+    - not ohpc_repofile_result.stat.exists
+    - ohpc_repo_state is defined
+
+- name: OHPC | Import GPG key
+  rpm_key:
+    key: "{{ ohpc_repo_gpg_key_url }}"
+    state: present
+  when:
+    - not ohpc_repofile_result.stat.exists
+    - ohpc_repo_state is defined
+  ignore_errors: "{{ ansible_check_mode }}"
+
+## RPMFUSION free
+
+- name: RPMFUSION free | Check repo
+  stat: path={{ rpmfusion_free_repofile_path }}
+  register: rpmfusion_free_repofile_result
+
+- name: RPMFUSION free | Install repo
+  yum:
+    name: "{{ rpmfusion_free_repo_url }}"
+    state: present
+  register: result
+  until: 'result.rc == 0'
+  retries: 5
+  delay: 10
+  when:
+    - not rpmfusion_free_repofile_result.stat.exists
+    - rpmfusion_free_repo_state is defined
+
+- name: RPMFUSION free | Import GPG key
+  rpm_key:
+    key: "{{ rpmfusion_free_repo_gpg_key_url }}"
+    state: present
+  when:
+    - not rpmfusion_free_repofile_result.stat.exists
+    - rpmfusion_free_repo_state is defined
+  ignore_errors: "{{ ansible_check_mode }}"
+
+## RPMFUSION non-free
+
+- name: RPMFUSION nonfree | Check repo
+  stat: path={{ rpmfusion_nonfree_repofile_path }}
+  register: rpmfusion_nonfree_repofile_result
+
+- name: RPMFUSION nonfree | Install repo
+  yum:
+    name: "{{ rpmfusion_nonfree_repo_url }}"
+    state: present
+  register: result
+  until: 'result.rc == 0'
+  retries: 5
+  delay: 10
+  when:
+    - not rpmfusion_nonfree_repofile_result.stat.exists
+    - rpmfusion_nonfree_repo_state is defined
+
+- name: RPMFUSION nonfree | Import GPG key.
+  rpm_key:
+    key: "{{ rpmfusion_nonfree_repo_gpg_key_url }}"
+    state: present
+  when:
+    - not rpmfusion_nonfree_repofile_result.stat.exists
+    - rpmfusion_nonfree_repo_state is defined
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: ZFS | Check repo
+  stat: path={{ zfs_repofile_path }}
+  register: zfs_repofile_result
+
+## ZFS repo 
+
+- name: ZFS | Install repo.
+  yum:
+    name: "{{ zfs_repo_url }}"
+    state: present
+  register: result
+  until: 'result.rc == 0'
+  retries: 5
+  delay: 10
+  when:
+    - not zfs_repofile_result.stat.exists
+    - zfs_repo_state is defined
+
+- name: ZFS | Import GPG key.
+  rpm_key:
+    key: "{{ zfs_repo_gpg_key_url }}"
+    state: present
+  when:
+    - not zfs_repofile_result.stat.exists
+    - zfs_repo_state is defined
+  ignore_errors: "{{ ansible_check_mode }}"
+
+# Install from .repo file 
+
+## OpenNebula 
+
+- block:
+
+  - name: OpenNebula | Check repo
+    stat:
+      path: "{{ opennebula_repofile_path }}"
+    register: opennebula_repofile_result
+
+  - name: OpenNebula | opennebula yum repo
+    template:
+      src: opennebula.repo.j2
+      dest: "{{ opennebula_repofile_path }}"
+      owner: root
+      mode: 644
+    when:
+      - not opennebula_repofile_result.stat.exists
+
+  - name: OpenNebula | Import GPG key.
+    rpm_key:
+      key: "{{ opennebula_repo_gpg_key_url }}"
+      state: present
+    when:
+      - not opennebula_repofile_result.stat.exists
+    ignore_errors: "{{ ansible_check_mode }}"
+
+  when:
+    - opennebula_repo_state is defined
+
+## Ceph
+
+- block:
+
+  - name: Ceph | Check repo
+    stat:
+      path: "{{ ceph_repofile_path }}"
+    register: ceph_repofile_result
+
+  - name: Ceph | install yum repo
+    template:
+      src: ceph.repo.j2
+      dest: "{{ ceph_repofile_path }}"
+      owner: root
+      mode: 644
+    when:
+      - not ceph_repofile_result.stat.exists
+
+  - name: Ceph | Import GPG key.
+    rpm_key:
+      key: "{{ ceph_repo_gpg_key_url }}"
+      state: present
+    when:
+      - not ceph_repofile_result.stat.exists
+    ignore_errors: "{{ ansible_check_mode }}"
+
+  when:
+    - ceph_repo_state is defined
+
+## Scico
+

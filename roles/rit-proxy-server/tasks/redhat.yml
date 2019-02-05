@@ -1,0 +1,49 @@
+---
+
+- name: copy | polipo src rpm
+  copy:
+    src: polipo-1.1.1-6.el7.src.rpm 
+    dest: /root/rpmbuild/SRPMS/polipo-1.1.1-6.el7.src.rpm
+
+- name: install | polipo src rpm 
+  command: "/usr/bin/rpm -ivh polipo-1.1.1-6.el7.src.rpm" 
+  args:
+    chdir: /root/rpmbuild/SRPMS/
+    creates: /root/rpmbuild/SPECS/polipo.spec
+
+- name: check | rpmbuild 
+  yum:
+    name: rpm-build 
+    state: present
+
+- name: check | Development Tools
+  yum:
+    name: "@Development Tools"
+    state: present
+  
+- name: build | src rpm 
+  command: "/usr/bin/rpmbuild -ba polipo.spec" 
+  args:
+    chdir: /root/rpmbuild/SPECS
+    creates: /root/rpmbuild/RPMS/x86_64/polipo-1.1.1-6.el7.x86_64.rpm
+
+- name: install | yum 
+  yum:
+    name: /root/rpmbuild/RPMS/x86_64/polipo-1.1.1-6.el7.x86_64.rpm
+    state: present
+
+- name: configure | /etc/polipo/config
+  copy:
+    src: config
+    dest: /etc/polipo/config
+
+- name: service | enable
+  service:
+    name: polipo
+    enabled: yes
+    
+- name: service | start
+  service:
+    name: polipo
+    state: started
+    

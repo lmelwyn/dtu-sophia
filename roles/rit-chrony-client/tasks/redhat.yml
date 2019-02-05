@@ -1,0 +1,12 @@
+---
+# tasks file for RedHat
+
+- name: Package | Ensure chrony installed (RedHat).
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items: "{{ chrony_packages }}"
+
+- name: Timezone |  set timezone to Europe/Copenhagen
+  timezone:
+    name: Europe/Copenhagen

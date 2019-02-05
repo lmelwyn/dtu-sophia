@@ -1,0 +1,136 @@
+---
+
+# All vault_* parameters should be defined in a ansible-vault encrypted vault_all.yml file. 
+
+# OpenNebula configuration 
+
+one: 
+  state: false                          # if true install
+
+# one frontend
+
+  head: 
+    name: "{{ vault_one.head.name }}"	# ip name
+    num: "{{ vault_one.head.num }}"	# node number identifier, if using ohpc nodes
+    mac: "{{ vault_one.head.mac }}"	# mac address 
+    bmc: "{{ vault_one.head.bmc }}"	# bmc ip
+    ip: "{{ vault_one.head.ip }}"	#
+
+# storage configuration 
+
+  ceph:
+    keyvalue: "{{ vault_one.head.ceph.keyvalue }}"
+    keyname: " {{ vault_one.head.ceph.keyname }}"
+    rbd: '/mnt/cephfs'
+    srv: 'x1.y1.z1.1,x2.y2.z2.2,x3.y3.z3.3:/'
+
+# one hosts
+
+  nodes: 
+    - { num: 1, name: "n001", ip: "x.y.z.1", mac: "de:ad:be:ef:ca:f1", bmc: "i.j.k.1"} 
+    - { num: 2, name: "n002", ip: "x.y.z.2", mac: "de:ad:be:ef:ca:f2", bmc: "i.j.k.2"} 
+
+# Kubernetes configuration
+
+k8s:
+  state: false                          # if true install  
+
+# master 
+
+  head: 
+    name: "{{ vault_k8s.head.name }}"	# ip name of the node
+    num: " {{ vault_k8s.head.num }}"	# node number identifier, if using ohpc nodes
+    mac: "{{ vault_k8s.head.mac }}" 	# node mac address
+    bmc: "{{ vault_k8s.head.bmc }}"	# node bmc ip
+    ip: "{{ vault_k8s.head.ip }}"	# node ip
+
+# storage configuration
+
+  ceph:
+    keyvalue: "{{ vault_k8s.head.ceph.keyvalue }}"
+    keyname: " {{ vault_k8s.head.ceph.keyname }}"
+    rbd: '/mnt/cephfs'
+    srv: 'x1.y1.z1.1,x2.y2.z2.2,x3.y3.z3.3:/'
+
+# k8s nodes
+
+  nodes: 
+    - { num: 3, name: "n003", ip: "x.y.z.3", mac: "de:ad:be:ef:ca:f3", bmc: "i.j.k.3"}
+    - { num: 4, name: "n004", ip: "x.y.z.4", mac: "de:ad:be:ef:ca:f4", bmc: "i.j.k.4"}
+
+    
+# OpenHPC configuration 
+
+ohpc:
+  head:
+    name: "{{ vault_ohpc.head.name }}"  
+    ipaddr: "{{ vault_ohpc.head.name }}"
+    netmask: "{{ vault_ohpc.head.ipaddr }}"
+    gateway: "{{ vault_ohpc.head.gateway }}"
+    broadcast: "{{ vault_ohpc.head.broadcast }}"
+    network: "{{ vault_ohpc.head.network }}"
+    eth_internal: "em1"
+    dns: "{{ vault_ohpc.head.dns }}" 
+    domain: "{{ domain }}"
+    ipmiuser: "{{ vault_ipmiuser }}"
+    ipmipass: "{{ vault_ipmipass }}"
+    kargs: false
+    dhcp: true
+    ifup: true 
+    warewulf: true
+    eth_provision: "em1"
+    eth_nodes: "em1"
+    node_regex: "n*"
+    node_prefix: "n"
+    node_count: 3
+    dhcp_def_lease: 21400
+    dhcp_max_lease: 43200
+
+  fs:
+    nfs_ohpc: true
+    nfs_home: true
+
+    nfs_static: 
+      state: false
+      mnt: [''] 
+
+    nfs_auto: 
+      state: false
+      mnt: [''] 
+
+    ceph:
+      state: true
+      keyname: "{{ vault_ohpc.fs.ceph.keyvalue }}" 
+      keyvalue: "{{ vault_ohpc.fs.ceph.keyvalue }}"
+      mnt: '/mnt/cephfs'
+      srv: 'x1.y1.z1.1,x2.y2.z2.2,x3.y3.z3.3:/'
+
+    lustre: false
+    beegfs: false
+
+  ib:
+    opensm: false
+    ipoib: false
+
+  mon:
+    ganglia: true
+    nagios: true
+    rsyslog.m: false
+    elastic.m: false
+
+  tool:
+    clustershell: true
+    ipmisol: true
+    genders: true
+    mrsh: true
+    powerman: false
+
+  sw:
+    mpi_defaults: true
+    intel: false
+    opa: false
+
+  nodes:
+    - { num: 5, name: "n005", ip: "x.y.z.5", mac: "de:ad:be:ef:ca:f5", bmc: "i.j.k.5"}
+    - { num: 6, name: "n006", ip: "x.y.z.6", mac: "de:ad:be:ef:ca:f6", bmc: "i.j.k.6"}
+    - { num: 7, name: "n007", ip: "x.y.z.7", mac: "de:ad:be:ef:ca:f7", bmc: "i.j.k.7"}

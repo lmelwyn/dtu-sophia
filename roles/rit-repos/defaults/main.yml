@@ -1,0 +1,56 @@
+---
+
+# define proxy in /etc/yum.conf
+
+proxy_address: "sms.hpc.ait.dtu.dk"
+proxy_port: "8123"
+proxy_state: false
+
+# install repo releases
+
+elrepo_repo_version: 7.0-3
+elrepo_repo_url: "http://www.elrepo.org/elrepo-release-{{ elrepo_repo_version }}.elrepo.noarch.rpm"
+elrepo_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-elrepo.org"
+elrepo_repofile_path: "/etc/yum.repos.d/elrepo.repo"
+
+epel_repo_version: 1
+epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+epel_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+epel_repofile_path: "/etc/yum.repos.d/epel.repo"
+
+ohpc_repo_version: 1.3-1
+ohpc_repo_url: "https://github.com/openhpc/ohpc/releases/download/v1.3.GA/ohpc-release-{{ ohpc_repo_version }}.el7.x86_64.rpm"
+ohpc_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-OpenHPC-1"
+ohpc_repofile_path: "/etc/yum.repos.d/OpenHPC.repo"
+
+rpmfusion_free_repo_version: 7
+rpmfusion_free_repo_url: "https://download1.rpmfusion.org/free/el/rpmfusion-free-release-{{ rpmfusion_nonfree_repo_version }}.noarch.rpm"
+rpmfusion_free_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-el-7"
+rpmfusion_free_repofile_path: "/etc/yum.repos.d/rpmfusion-free-updates.repo"
+
+rpmfusion_nonfree_repo_version: 7
+rpmfusion_nonfree_repo_url: "https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-{{ rpmfusion_nonfree_repo_version }}.noarch.rpm"
+rpmfusion_nonfree_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-el-7"
+rpmfusion_nonfree_repofile_path: "/etc/yum.repos.d/rpmfusion-nonfree-updates.repo"
+
+zfs_repo_version: 7_6
+zfs_repo_url: "http://download.zfsonlinux.org/epel/zfs-release.el{{ zfs_repo_version }}.noarch.rpm"
+zfs_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux"
+zfs_repofile_path: "/etc/yum.repos.d/zfs.repo"
+
+# install repositories
+
+opennebula_repo_version: "5.6"
+opennebula_repo_url: "https://downloads.opennebula.org/repo/{{ opennebula_repo_version }}/CentOS/7/x86_64"
+opennebula_repo_gpg_key_url: "https://downloads.opennebula.org/repo/repo.key"
+opennebula_repofile_path: "/etc/yum.repos.d/opennebula.repo"
+
+ceph_repo_version: "luminous"
+ceph_repo_url: "https://download.ceph.com/rpm-luminous/el7/x86_64"
+ceph_repo_gpg_key_url: "https://download.ceph.com/keys/release.asc"
+ceph_repofile_path: "/etc/yum.repos.d/ceph.repo"
+
+scico_repo_version: "epyc"
+scico_repo_url: "http://repo.scico.io/epyc"
+scico_repo_gpg_key_url: "http://repo.scico.io/keys"
+scico_repofile_path: "/etc/yum.repos.d/scico.repo"

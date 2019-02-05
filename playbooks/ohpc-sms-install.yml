@@ -1,0 +1,29 @@
+---
+- hosts: sms 
+  user: root
+
+  become: yes
+
+  pre_tasks:
+    - name: Install getent and cut
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - glibc-common
+          - coreutils
+
+    - name: Get ssh login user
+      shell: 'getent passwd "{{ansible_ssh_user}}" | cut -d: -f6'
+      register: ansible_home_result
+
+    - name: Set the fact for the other scripts to use
+      set_fact: ansible_home='{{ansible_home_result.stdout}}'
+
+#  ansible-playbook -i inventory/sms.yml playbooks/ohpc-sms-install.yml --vault-id @prompt  --user=root
+
+  roles:
+    - { role: rit-repos, opennebula_repo_state: true, ohpc_repo_state: true, ceph_repo_state: true, elrepo_repo_state: true, tags: repo }
+    - { role: rit-proxy-server,   tags: proxy }
+    - { role: ohpc-config-vars,   tags: vars}

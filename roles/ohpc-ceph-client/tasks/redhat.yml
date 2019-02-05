@@ -1,0 +1,84 @@
+---
+
+## Add cephfs to sms
+
+- block: 
+  - name: install ceph packages 
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars: 
+      packages:
+        - ceph-common
+        - attr 
+
+  - name: check /etc/ceph.conf exists
+    file: 
+      path: /etc/ceph
+      state: directory
+
+  - name: copy ceph.conf
+    copy: 
+      src: ceph.conf
+      dest: /etc/ceph/ceph.conf
+
+  - name: create cephfs key file 
+    file: 
+      name: "/etc/ceph/{{ cluster.fs.ceph.keyname}}.key"
+      state: touch 
+      mode: u=r
+
+  - name: add cephfs key value to key file
+    lineinfile:
+      path: "/etc/ceph/{{ cluster.fs.ceph.keyname }}.key"
+      line: "{{ cluster.fs.ceph.keyvalue }}"
+
+  - name: add cephfs mountpoint to fstab 
+    lineinfile:
+      path: /etc/fstab
+      line: '{{ cluster.fs.ceph.srv }} {{ cluster.fs.ceph.mnt }} ceph mds_namespace={{ cluster.fs.ceph.namespace }},name={{ cluster.fs.ceph.keyname }},secretfile=/etc/ceph/{{ cluster.fs.ceph.keyname }}.key,_netdev,defaults 0 0'
+  when:
+    - cluster.fs.ceph.state == true 
+
+
+## Add ceph to CHROOT image 
+
+- block: 
+  - name: install ceph packages 
+    yum:
+      name: "{{ packages }}"
+      state: present
+      installroot: "{{ compute_chroot_loc }}"
+    vars: 
+      packages:
+        - ceph-common
+        - attr 
+
+  - name: check /etc/ceph.conf exists
+    file: 
+      path: "/{{ compute_chroot_loc }}/etc/ceph"
+      state: directory
+
+  - name: copy ceph.conf
+    copy: 
+      src: ceph.conf
+      dest: "/{{ compute_chroot_loc }}/etc/ceph/ceph.conf"
+
+  - name: create cephfs key file 
+    file: 
+      name: "/{{ compute_chroot_loc }}/etc/ceph/{{ cluster.fs.ceph.keyname}}.key"
+      state: touch 
+      mode: u=r
+
+  - name: add cephfs key value to key file
+    lineinfile:
+      path: "/{{ compute_chroot_loc }}/etc/ceph/{{ cluster.fs.ceph.keyname }}.key"
+      line: "{{ cluster.fs.ceph.keyvalue }}"
+
+  - name: add cephfs mountpoint to fstab 
+    lineinfile:
+      path: "{{ compute_chroot_loc}}/etc/fstab"
+      line: '{{ cluster.fs.ceph.srv }} {{ cluster.fs.ceph.mnt }} ceph mds_namespace={{ cluster.fs.ceph.namespace }},name={{ cluster.fs.ceph.keyname }},secretfile=/etc/ceph/{{ cluster.fs.ceph.keyname }}.key,_netdev,defaults 0 0'
+  
+  when:
+   - cluster.fs.ceph.state == true

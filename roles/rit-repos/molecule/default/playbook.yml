@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - {role: 'rit-repos', 'elrepo_repo_state': 'true', 
+             'epel_repo_state': 'true', 
+             'ohpc_repo_state': 'true', 
+             'rpmfusion_free_state': 'true', 
+             'rpmfusion_nonfree_state': 'true'}
